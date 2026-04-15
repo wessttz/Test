@@ -1,0 +1,16 @@
+{
+  "name": "evodb",
+  "version": "1.0.0",
+  "description": "Node.js client for EvoDB — a fast custom database with its own binary protocol",
+  "main": "src/client.js",
+  "types": "src/client.d.ts",
+  "scripts": {
+    "build-server": "node scripts/build.js",
+    "test": "node test/basic.js"
+  },
+  "keywords": ["database", "evodb", "nosql", "client", "bot"],
+  "license": "MIT",
+  "engines": {
+    "node": ">=16"
+  }
+}
