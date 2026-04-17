@@ -650,14 +650,14 @@ func (s *Server) statusPage(w http.ResponseWriter, r *http.Request) {
 	queryCount := s.queries.Load()
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	fmt.Fprintf(w, dashboardHTML,
-		s.dbPath,
-		tableListItems,
-		len(tables),
-		totalRows,
-		uptimeStr,
-		queryCount,
-	)
+	page := dashboardHTML
+	page = strings.ReplaceAll(page, "{{DBPATH}}", s.dbPath)
+	page = strings.ReplaceAll(page, "{{TABLELIST}}", tableListItems)
+	page = strings.ReplaceAll(page, "{{TABLECOUNT}}", fmt.Sprintf("%d", len(tables)))
+	page = strings.ReplaceAll(page, "{{ROWCOUNT}}", fmt.Sprintf("%d", totalRows))
+	page = strings.ReplaceAll(page, "{{UPTIME}}", uptimeStr)
+	page = strings.ReplaceAll(page, "{{QUERIES}}", fmt.Sprintf("%d", queryCount))
+	w.Write([]byte(page))
 }
 
 const dashboardHTML = `<!DOCTYPE html>
@@ -1238,11 +1238,11 @@ body {
         </div>
         <span class="brand-name">EVO<span>DB</span></span>
       </div>
-      <div class="brand-db">%s</div>
+      <div class="brand-db">{{DBPATH}}</div>
     </div>
     <div class="sidebar-section">
       <div class="sidebar-label">Tablas</div>
-      <div id="tableList">%s</div>
+      <div id="tableList">{{TABLELIST}}</div>
     </div>
     <div class="sidebar-footer">
       <a href="/logout" class="logout-btn">
@@ -1265,19 +1265,19 @@ body {
     <div class="stats-row">
       <div class="stat">
         <div class="stat-label">Tablas</div>
-        <div class="stat-val accent">%d</div>
+        <div class="stat-val accent">{{TABLECOUNT}}</div>
       </div>
       <div class="stat">
         <div class="stat-label">Registros</div>
-        <div class="stat-val">%d</div>
+        <div class="stat-val">{{ROWCOUNT}}</div>
       </div>
       <div class="stat">
         <div class="stat-label">Uptime</div>
-        <div class="stat-val" style="font-size:1.1rem">%s</div>
+        <div class="stat-val" style="font-size:1.1rem">{{UPTIME}}</div>
       </div>
       <div class="stat">
         <div class="stat-label">Queries</div>
-        <div class="stat-val">%d</div>
+        <div class="stat-val">{{QUERIES}}</div>
       </div>
     </div>
 
