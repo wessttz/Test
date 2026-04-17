@@ -16,7 +16,6 @@ import (
 	"evodb/protocol"
 )
 
-// ── Console colors ────────────────────────────────────────────────────────────
 const (
 	reset   = "\033[0m"
 	bold    = "\033[1m"
@@ -33,10 +32,9 @@ const (
 	bgWine  = "\033[48;5;88m"
 )
 
-// ── Auth ──────────────────────────────────────────────────────────────────────
 const (
 	adminUser = "admin"
-	adminPass = "evodb2025"
+	adminPass = "admin"
 	cookieName = "evodb_session"
 	sessionToken = "evodb_authenticated_session_v1"
 )
@@ -63,7 +61,6 @@ func (s *Server) Start() error {
 
 	s.printBanner()
 
-	// Checkpoint goroutine
 	go func() {
 		ticker := time.NewTicker(5 * time.Minute)
 		for range ticker.C {
@@ -73,7 +70,6 @@ func (s *Server) Start() error {
 		}
 	}()
 
-	// TCP server
 	go func() {
 		ln, err := net.Listen("tcp", s.addr)
 		if err != nil {
@@ -81,7 +77,7 @@ func (s *Server) Start() error {
 			return
 		}
 		defer ln.Close()
-		fmt.Printf(green+"  ✦ "+reset+white+bold+"TCP"+reset+gray+"  ──  "+reset+cyan+"%s"+reset+"\n", s.addr)
+		fmt.Printf(green+"  ○ "+reset+white+bold+"TCP"+reset+gray+"  ──  "+reset+cyan+"%s"+reset+"\n", s.addr)
 		for {
 			conn, err := ln.Accept()
 			if err != nil {
@@ -96,12 +92,6 @@ func (s *Server) Start() error {
 		httpAddr = ":7778"
 	}
 
-	fmt.Printf(green+"  ✦ "+reset+white+bold+"HTTP"+reset+gray+" ──  "+reset+cyan+"%s"+reset+"\n", httpAddr)
-	fmt.Printf(gray+"  ─────────────────────────────────────────\n"+reset)
-	fmt.Printf(wine+bold+"  ◈  EvoDB está listo para recibir consultas\n"+reset)
-	fmt.Printf(gray+"  ─────────────────────────────────────────\n\n"+reset)
-
-	// HTTP routes
 	mux := http.NewServeMux()
 	mux.HandleFunc("/login",      s.handleLogin)
 	mux.HandleFunc("/logout",     s.handleLogout)
@@ -117,15 +107,14 @@ func (s *Server) Start() error {
 func (s *Server) printBanner() {
 	fmt.Print("\n")
 	fmt.Printf(wine+bold+"  ╔══════════════════════════════════════════╗\n"+reset)
-	fmt.Printf(wine+bold+"  ║"+reset+white+bold+"        E V O D B  —  Database Server      "+wine+bold+"║\n"+reset)
+	fmt.Printf(wine+bold+"  ║"+reset+white+bold+"        E V O D B  —  Database Server     "+wine+bold+"║\n"+reset)
 	fmt.Printf(wine+bold+"  ╚══════════════════════════════════════════╝\n"+reset)
 	fmt.Print("\n")
-	fmt.Printf(gray+"  %-10s"+reset+cyan+" %s\n"+reset, "◆ DB", s.dbPath)
-	fmt.Printf(gray+"  %-10s"+reset+cyan+" %s\n"+reset, "◆ Addr", s.addr)
+	fmt.Printf(gray+"  %-10s"+reset+cyan+" %s\n"+reset, "DB", s.dbPath)
+	fmt.Printf(gray+"  %-10s"+reset+cyan+" %s\n"+reset, "Addr", s.addr)
 	fmt.Print("\n")
 }
 
-// ── Auth middleware ───────────────────────────────────────────────────────────
 func (s *Server) isAuthenticated(r *http.Request) bool {
 	cookie, err := r.Cookie(cookieName)
 	if err != nil {
@@ -184,7 +173,6 @@ func (s *Server) handleLogout(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/login", http.StatusFound)
 }
 
-// ── API: table CRUD operations ────────────────────────────────────────────────
 func (s *Server) apiTableOps(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -199,7 +187,6 @@ func (s *Server) apiTableOps(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		// GET /api/table/:name — fetch all rows + schema
 		rows, cols, err := s.db.Query(table, nil, nil, 0)
 		if err != nil {
 			w.Write([]byte(`{"error":"` + err.Error() + `"}`))
@@ -229,7 +216,6 @@ func (s *Server) apiTableOps(w http.ResponseWriter, r *http.Request) {
 		})
 
 	case http.MethodPost:
-		// POST /api/table/:name — execute raw command
 		body, _ := io.ReadAll(r.Body)
 		var req struct{ Cmd string `json:"cmd"` }
 		if err := json.Unmarshal(body, &req); err != nil || req.Cmd == "" {
@@ -245,7 +231,6 @@ func (s *Server) apiTableOps(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// ── API status JSON ───────────────────────────────────────────────────────────
 func (s *Server) apiStatus(w http.ResponseWriter, r *http.Request) {
 	tables := s.db.ListTables()
 	tableStats := []map[string]interface{}{}
@@ -270,7 +255,6 @@ func (s *Server) apiStatus(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// ── HTTP query endpoint ───────────────────────────────────────────────────────
 func (s *Server) httpQuery(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "POST only", http.StatusMethodNotAllowed)
@@ -299,7 +283,6 @@ func buildResponse(result string) []byte {
 	return append(append([]byte(`{"result":`), b...), '}')
 }
 
-// ── TCP handler ───────────────────────────────────────────────────────────────
 func (s *Server) handleConn(conn net.Conn) {
 	defer conn.Close()
 	addr := conn.RemoteAddr().String()
@@ -324,7 +307,6 @@ func (s *Server) handleConn(conn net.Conn) {
 	fmt.Printf(yellow+"  [-] "+reset+gray+"%-22s"+reset+dim+" desconectado\n"+reset, addr)
 }
 
-// ── Execute query ─────────────────────────────────────────────────────────────
 func (s *Server) execute(raw string) string {
 	cmd, err := protocol.Parse(raw)
 	if err != nil {
