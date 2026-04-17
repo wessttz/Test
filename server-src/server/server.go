@@ -440,7 +440,6 @@ func formatRows(rows []engine.Row, cols []engine.Column) string {
 	return sb.String()
 }
 
-// ── Login page HTML ───────────────────────────────────────────────────────────
 func (s *Server) loginPage(errMsg string) string {
 	errHTML := ""
 	if errMsg != "" {
@@ -611,7 +610,6 @@ button:active { transform: scale(0.98); }
 </html>`
 }
 
-// ── Dashboard HTML ────────────────────────────────────────────────────────────
 func (s *Server) statusPage(w http.ResponseWriter, r *http.Request) {
 	tables := s.db.ListTables()
 	uptime := time.Since(s.startTime)
@@ -700,10 +698,8 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── Layout ── */
 .layout { display: flex; height: 100vh; overflow: hidden; }
 
-/* ── Sidebar ── */
 .sidebar {
   width: 230px;
   min-width: 230px;
@@ -815,7 +811,6 @@ body {
 }
 .logout-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
 
-/* ── Mobile drawer toggle ── */
 .menu-btn {
   display: none;
   background: none;
@@ -836,7 +831,6 @@ body {
   backdrop-filter: blur(2px);
 }
 
-/* ── Main ── */
 .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
 .topbar {
   padding: 14px 20px;
@@ -872,7 +866,6 @@ body {
 }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
-/* ── Stats ── */
 .stats-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -902,10 +895,8 @@ body {
 }
 .stat-val.accent { color: var(--accent); }
 
-/* ── Content ── */
 .content { flex: 1; overflow: auto; padding: 20px; background: var(--bg); }
 
-/* ── Welcome ── */
 .welcome {
   display: flex;
   flex-direction: column;
@@ -933,7 +924,6 @@ body {
   color: var(--muted);
 }
 
-/* ── Table view ── */
 .table-view { display: none; }
 .tv-header {
   display: flex;
@@ -975,7 +965,6 @@ body {
 .btn-ghost { background: var(--surface); border-color: var(--border); color: var(--text2); }
 .btn-ghost:hover { border-color: var(--border2); color: var(--text); background: var(--surface2); }
 
-/* ── Data table ── */
 .data-table-wrap {
   border: 1.5px solid var(--border);
   border-radius: var(--radius);
@@ -1037,7 +1026,6 @@ body {
   font-size: 0.82rem;
 }
 
-/* ── Query terminal ── */
 .query-terminal {
   margin-top: 16px;
   border: 1.5px solid var(--border);
@@ -1107,7 +1095,6 @@ body {
 .qt-result.err { color: var(--accent); border-color: rgba(211,47,47,0.3); background: var(--accent-dim); }
 .qt-result.show { display: block; }
 
-/* ── Modal ── */
 .modal-bg {
   display: none;
   position: fixed;
@@ -1175,7 +1162,6 @@ body {
   border-top: 1px solid var(--border);
 }
 
-/* ── Toast ── */
 .toast {
   position: fixed;
   bottom: 20px;
@@ -1200,7 +1186,6 @@ body {
 .toast.ok { border-color: rgba(22,163,74,0.4); color: var(--green); }
 .toast.err { border-color: rgba(211,47,47,0.4); color: var(--accent); }
 
-/* ── Mobile ── */
 @media (max-width: 680px) {
   .sidebar {
     position: fixed;
@@ -1229,7 +1214,6 @@ body {
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 <div class="layout">
 
-  <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-brand">
       <div class="brand-row">
@@ -1252,7 +1236,6 @@ body {
     </div>
   </aside>
 
-  <!-- Main -->
   <main class="main">
     <div class="topbar">
       <div class="topbar-left">
@@ -1321,7 +1304,6 @@ body {
   </main>
 </div>
 
-<!-- Insert/Edit Modal -->
 <div class="modal-bg" id="modal" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <div class="modal-title" id="modalTitle">Insertar fila</div>
@@ -1333,7 +1315,6 @@ body {
   </div>
 </div>
 
-<!-- Toast -->
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1459,7 +1440,6 @@ async function submitModal() {
 
   let cmd;
   if (editRowIndex !== null) {
-    // Use UPSERT with first indexed col as key
     const keyCol = currentSchema.find(c => c.indexed) || currentSchema[0];
     if (!keyCol) { showToast('Sin columna clave', 'err'); return; }
     cmd = 'UPSERT ' + currentTable + ' KEY ' + keyCol.name + ' (' + vals.join(', ') + ')';
