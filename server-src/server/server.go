@@ -376,8 +376,6 @@ func (s *Server) execute(raw string) string {
 	}
 }
 
-// formatRows serializes rows as JSON for the wire protocol.
-// All values are serialized as strings for backwards compatibility with clients.
 func formatRows(rows []engine.Row, cols []engine.Column) string {
 	if len(rows) == 0 {
 		return "OK []"
@@ -534,10 +532,8 @@ const dashboardHTML = `<!DOCTYPE html>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased}
 
-/* ── LAYOUT ── */
 .layout{display:flex;height:100dvh;overflow:hidden}
 
-/* ── SIDEBAR ── */
 .sidebar{
   width:240px;min-width:240px;background:var(--surface);
   border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;
@@ -562,10 +558,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .logout-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:9px;background:none;border:1.5px solid var(--border);border-radius:var(--radius);color:var(--text2);font-family:var(--sans);font-size:.78rem;font-weight:600;cursor:pointer;text-decoration:none;transition:all .15s}
 .logout-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
 
-/* ── MAIN ── */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 
-/* ── TOPBAR ── */
 .topbar{
   padding:12px 16px;border-bottom:1px solid var(--border);
   display:flex;align-items:center;justify-content:space-between;
@@ -580,7 +574,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .status-pill::before{content:'';width:5px;height:5px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
 
-/* ── STATS ── */
 .stats-row{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0}
 .stat{padding:11px 16px;border-right:1px solid var(--border)}
 .stat:last-child{border-right:none}
@@ -588,13 +581,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .stat-val{font-family:var(--mono);font-size:1.2rem;font-weight:700;margin-top:2px;color:var(--text)}
 .stat-val.accent{color:var(--accent)}
 
-/* ── CONTENT ── */
 .content{flex:1;overflow:auto;padding:16px;background:var(--bg)}
 .welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:260px;text-align:center;color:var(--muted);gap:10px}
 .welcome-icon{font-size:2.5rem;opacity:.4}
 .welcome h2{font-size:.85rem;font-weight:500;color:var(--muted)}
 
-/* ── TABLE VIEW ── */
 .table-view{display:none}
 .tv-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;flex-wrap:wrap}
 .tv-title{display:flex;align-items:center;gap:8px;min-width:0}
@@ -607,7 +598,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .btn-ghost{background:var(--surface);border-color:var(--border);color:var(--text2)}
 .btn-ghost:hover{border-color:var(--border2);color:var(--text);background:var(--surface2)}
 
-/* ── DATA TABLE ── */
 .data-table-wrap{border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--surface);box-shadow:var(--shadow);overflow-x:auto;-webkit-overflow-scrolling:touch}
 .data-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.74rem}
 .data-table th{padding:9px 14px;text-align:left;font-size:.58rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);background:var(--surface2);border-bottom:1.5px solid var(--border);white-space:nowrap;font-weight:600}
@@ -626,7 +616,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .td-btn-del:hover{background:var(--accent-dim);border-color:rgba(229,57,53,.4)}
 .empty-table{text-align:center;padding:40px;color:var(--muted);font-size:.8rem}
 
-/* ── QUERY TERMINAL ── */
 .query-terminal{margin-top:12px;border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--surface);box-shadow:var(--shadow)}
 .qt-header{padding:8px 13px;background:var(--surface2);border-bottom:1px solid var(--border)}
 .qt-label{font-family:var(--mono);font-size:.58rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-weight:600}
@@ -640,7 +629,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .qt-result.err{color:var(--accent);border-color:rgba(229,57,53,.3);background:var(--accent-dim)}
 .qt-result.show{display:block}
 
-/* ── MODAL ── */
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);z-index:100;align-items:flex-end;justify-content:center;padding:0}
 .modal-bg.open{display:flex}
 .modal{
@@ -658,7 +646,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .modal-field{margin-bottom:12px}
 .modal-field label{display:flex;align-items:center;gap:6px;font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-family:var(--mono);font-weight:600;margin-bottom:5px}
 .modal-field label .ftype{color:var(--accent);font-size:.58rem;background:var(--accent-dim);padding:1px 5px;border-radius:4px;border:1px solid rgba(229,57,53,.2)}
-/* textarea para STRING y JSON, input para el resto */
 .modal-field input,.modal-field textarea{
   width:100%;background:var(--bg);border:1.5px solid var(--border);
   border-radius:8px;padding:9px 12px;font-family:var(--mono);font-size:.82rem;
@@ -670,17 +657,14 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .modal-actions{display:flex;gap:8px;margin-top:16px;padding-top:12px;border-top:1px solid var(--border);flex-shrink:0}
 .modal-actions .btn{flex:1;justify-content:center;padding:11px}
 
-/* ── TOAST ── */
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:10px 18px;font-family:var(--sans);font-size:.78rem;font-weight:500;color:var(--text);z-index:200;opacity:0;transition:all .25s;pointer-events:none;box-shadow:var(--shadow);white-space:nowrap}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 .toast.ok{border-color:rgba(34,197,94,.4);color:var(--green)}
 .toast.err{border-color:rgba(229,57,53,.4);color:var(--accent)}
 
-/* ── OVERLAY (mobile sidebar) ── */
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:50}
 .overlay.open{display:block}
 
-/* ── MOBILE ── */
 @media(max-width:680px){
   .sidebar{
     position:fixed;left:0;top:0;bottom:0;z-index:60;
@@ -872,7 +856,6 @@ async function refreshTable() {
   } catch(e) { showToast('Error al refrescar', 'err'); }
 }
 
-/* --- Determina si un campo debe usar textarea --- */
 function isMultiline(col) {
   return col.type === 'STRING' || col.type === 'JSON';
 }
@@ -885,7 +868,6 @@ function buildField(c, val) {
       display = JSON.stringify(val, null, 2);
     } else {
       const s = String(val);
-      // Unescape \" to " (server stores JSON as escaped string)
       const unescaped = s.replace(/\\"/g, '"');
       if ((unescaped.startsWith('{') || unescaped.startsWith('[')) && (unescaped.endsWith('}') || unescaped.endsWith(']'))) {
         try { display = JSON.stringify(JSON.parse(unescaped), null, 2); } catch(e) { display = unescaped; }
@@ -911,7 +893,6 @@ function getFieldValue(c) {
   return el ? el.value : '';
 }
 
-/* --- Serializa valor según tipo para el protocolo evodb --- */
 function serializeVal(c, rawVal) {
   const v = rawVal.trim();
   if (v === '' || v.toLowerCase() === 'null') return 'NULL';
@@ -922,7 +903,6 @@ function serializeVal(c, rawVal) {
     if (lower === 'true' || lower === 'false') return lower;
     return JSON.stringify(v);
   }
-  /* STRING / JSON: enviar como string entre comillas dobles */
   return '"' + v.replace(/\\/g,'\\\\').replace(/"/g,'\\"') + '"';
 }
 
