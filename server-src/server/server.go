@@ -516,110 +516,201 @@ const dashboardHTML = `<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
 <title>EvoDB Dashboard</title>
 <style>
-:root{--bg:#f5f5f7;--surface:#fff;--surface2:#f0f0f3;--border:#e2e2e8;--border2:#d0d0d8;--accent:#d32f2f;--accent-b:#b71c1c;--accent-dim:rgba(211,47,47,.09);--text:#1a1a1e;--text2:#5a5a68;--muted:#9898a6;--green:#16a34a;--green-dim:rgba(22,163,74,.1);--mono:'IBM Plex Mono',monospace;--sans:'DM Sans',sans-serif;--radius:10px;--shadow:0 1px 3px rgba(0,0,0,.07),0 4px 16px rgba(0,0,0,.05)}
+:root{
+  --bg:#0e0e11;--surface:#17171c;--surface2:#1f1f26;--surface3:#26262f;
+  --border:#2a2a35;--border2:#35353f;
+  --accent:#e53935;--accent-b:#c62828;--accent-dim:rgba(229,57,53,.1);
+  --text:#f0f0f5;--text2:#9898aa;--muted:#55556a;
+  --green:#22c55e;--green-dim:rgba(34,197,94,.1);
+  --indigo:#818cf8;
+  --mono:'JetBrains Mono',monospace;--sans:'DM Sans',sans-serif;
+  --radius:10px;--radius-lg:14px;
+  --shadow:0 2px 8px rgba(0,0,0,.4);
+}
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-html{height:100%}
-body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);display:flex;flex-direction:column;-webkit-font-smoothing:antialiased}
-.layout{display:flex;height:100vh;overflow:hidden}
-.sidebar{width:220px;min-width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
-.sidebar-brand{padding:18px 14px 14px;border-bottom:1px solid var(--border)}
-.brand-name{font-family:var(--mono);font-size:.95rem;font-weight:700;color:var(--text)}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+
+/* ── LAYOUT ── */
+.layout{display:flex;height:100dvh;overflow:hidden}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:240px;min-width:240px;background:var(--surface);
+  border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;
+  transition:transform .25s ease;
+}
+.sidebar-brand{padding:18px 16px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.brand-name{font-family:var(--mono);font-size:1rem;font-weight:700;letter-spacing:-0.5px}
 .brand-name span{color:var(--accent)}
-.brand-db{margin-top:5px;font-family:var(--mono);font-size:.62rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sidebar-section{padding:12px 8px 8px;flex:1;overflow-y:auto}
-.sidebar-label{font-size:.58rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-family:var(--mono);padding:0 8px;margin-bottom:5px;font-weight:600}
-.tbl-item{display:flex;align-items:center;gap:7px;padding:7px 9px;border-radius:var(--radius);cursor:pointer;border:1.5px solid transparent;margin-bottom:2px;transition:background .12s}
+.brand-db{margin-top:4px;font-family:var(--mono);font-size:.6rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
+.close-sidebar{display:none;background:none;border:none;color:var(--text2);font-size:1.1rem;cursor:pointer;padding:4px}
+.sidebar-section{padding:12px 10px 8px;flex:1;overflow-y:auto}
+.sidebar-label{font-size:.55rem;text-transform:uppercase;letter-spacing:2px;color:var(--muted);font-family:var(--mono);padding:0 6px;margin-bottom:6px;font-weight:600}
+.tbl-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--radius);cursor:pointer;border:1.5px solid transparent;margin-bottom:2px;transition:all .12s}
 .tbl-item:hover{background:var(--surface2)}
-.tbl-item.active{background:var(--accent-dim);border-color:rgba(211,47,47,.3)}
-.tbl-icon{font-size:.6rem;color:var(--muted)}
-.tbl-name{flex:1;font-family:var(--mono);font-size:.78rem;color:var(--text);font-weight:500}
-.tbl-rows{font-family:var(--mono);font-size:.6rem;background:var(--surface2);color:var(--text2);padding:2px 6px;border-radius:5px;border:1px solid var(--border)}
-.tbl-item.active .tbl-rows{background:var(--accent-dim);color:var(--accent)}
-.no-tables{padding:10px 9px;font-size:.75rem;color:var(--muted);font-family:var(--mono);font-style:italic}
-.sidebar-footer{padding:10px 8px;border-top:1px solid var(--border)}
-.logout-btn{display:flex;align-items:center;gap:7px;width:100%;padding:7px 9px;background:none;border:1.5px solid var(--border);border-radius:var(--radius);color:var(--text2);font-family:var(--sans);font-size:.78rem;font-weight:500;cursor:pointer;text-decoration:none;transition:all .15s}
+.tbl-item.active{background:var(--accent-dim);border-color:rgba(229,57,53,.25)}
+.tbl-icon{font-size:.55rem;color:var(--muted)}
+.tbl-name{flex:1;font-family:var(--mono);font-size:.78rem;color:var(--text);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tbl-rows{font-family:var(--mono);font-size:.58rem;background:var(--surface2);color:var(--text2);padding:2px 7px;border-radius:5px;border:1px solid var(--border);white-space:nowrap}
+.tbl-item.active .tbl-rows{background:var(--accent-dim);color:var(--accent);border-color:rgba(229,57,53,.2)}
+.no-tables{padding:10px 6px;font-size:.75rem;color:var(--muted);font-family:var(--mono);font-style:italic}
+.sidebar-footer{padding:10px;border-top:1px solid var(--border)}
+.logout-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:9px;background:none;border:1.5px solid var(--border);border-radius:var(--radius);color:var(--text2);font-family:var(--sans);font-size:.78rem;font-weight:600;cursor:pointer;text-decoration:none;transition:all .15s}
 .logout-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+
+/* ── MAIN ── */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
-.topbar{padding:13px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface)}
-.topbar-title{font-size:.92rem;font-weight:600;color:var(--text)}
-.topbar-title span{color:var(--muted);font-weight:400;margin-left:4px}
-.status-pill{display:inline-flex;align-items:center;gap:5px;background:var(--green-dim);color:var(--green);font-family:var(--mono);font-size:.65rem;font-weight:600;padding:3px 9px;border-radius:20px;border:1px solid rgba(22,163,74,.2)}
+
+/* ── TOPBAR ── */
+.topbar{
+  padding:12px 16px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--surface);flex-shrink:0;
+}
+.topbar-left{display:flex;align-items:center;gap:10px}
+.hamburger{display:none;background:none;border:1.5px solid var(--border);border-radius:7px;color:var(--text2);padding:6px 8px;cursor:pointer;font-size:.85rem;line-height:1}
+.hamburger:hover{border-color:var(--border2);color:var(--text)}
+.topbar-title{font-size:.9rem;font-weight:600;color:var(--text)}
+.topbar-title span{color:var(--muted);font-weight:400;margin-left:4px;font-size:.82rem}
+.status-pill{display:inline-flex;align-items:center;gap:5px;background:var(--green-dim);color:var(--green);font-family:var(--mono);font-size:.62rem;font-weight:600;padding:3px 10px;border-radius:20px;border:1px solid rgba(34,197,94,.2)}
 .status-pill::before{content:'';width:5px;height:5px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.stats-row{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--border);background:var(--surface)}
-.stat{padding:14px 18px;border-right:1px solid var(--border)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* ── STATS ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0}
+.stat{padding:11px 16px;border-right:1px solid var(--border)}
 .stat:last-child{border-right:none}
-.stat-label{font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-family:var(--mono);font-weight:600}
-.stat-val{font-family:var(--mono);font-size:1.3rem;font-weight:700;margin-top:2px;color:var(--text)}
+.stat-label{font-size:.55rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-family:var(--mono);font-weight:600}
+.stat-val{font-family:var(--mono);font-size:1.2rem;font-weight:700;margin-top:2px;color:var(--text)}
 .stat-val.accent{color:var(--accent)}
-.content{flex:1;overflow:auto;padding:18px;background:var(--bg)}
-.welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:280px;text-align:center;color:var(--muted);gap:10px}
-.welcome h2{font-size:.88rem;font-weight:500;color:var(--muted)}
+
+/* ── CONTENT ── */
+.content{flex:1;overflow:auto;padding:16px;background:var(--bg)}
+.welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:260px;text-align:center;color:var(--muted);gap:10px}
+.welcome-icon{font-size:2.5rem;opacity:.4}
+.welcome h2{font-size:.85rem;font-weight:500;color:var(--muted)}
+
+/* ── TABLE VIEW ── */
 .table-view{display:none}
-.tv-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
-.tv-title{display:flex;align-items:center;gap:8px}
-.tv-title h2{font-size:.98rem;font-weight:700;color:var(--text)}
-.tv-count{font-family:var(--mono);font-size:.62rem;font-weight:600;background:var(--accent-dim);color:var(--accent);padding:2px 7px;border-radius:5px;border:1px solid rgba(211,47,47,.2)}
-.tv-actions{display:flex;gap:6px}
-.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;font-family:var(--sans);font-size:.76rem;font-weight:600;cursor:pointer;border:1.5px solid;transition:all .12s}
+.tv-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;flex-wrap:wrap}
+.tv-title{display:flex;align-items:center;gap:8px;min-width:0}
+.tv-title h2{font-size:.95rem;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tv-count{font-family:var(--mono);font-size:.6rem;font-weight:600;background:var(--accent-dim);color:var(--accent);padding:2px 8px;border-radius:5px;border:1px solid rgba(229,57,53,.2);white-space:nowrap}
+.tv-actions{display:flex;gap:6px;flex-shrink:0}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:8px;font-family:var(--sans);font-size:.76rem;font-weight:600;cursor:pointer;border:1.5px solid;transition:all .12s;white-space:nowrap}
 .btn-primary{background:var(--accent);border-color:var(--accent-b);color:#fff}
 .btn-primary:hover{background:var(--accent-b)}
 .btn-ghost{background:var(--surface);border-color:var(--border);color:var(--text2)}
 .btn-ghost:hover{border-color:var(--border2);color:var(--text);background:var(--surface2)}
-.data-table-wrap{border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--surface);box-shadow:var(--shadow);overflow-x:auto}
-.data-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.76rem}
-.data-table th{padding:9px 13px;text-align:left;font-size:.6rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);background:var(--surface2);border-bottom:1.5px solid var(--border);white-space:nowrap;font-weight:600}
-.data-table td{padding:8px 13px;border-bottom:1px solid var(--border);color:var(--text2);max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ── DATA TABLE ── */
+.data-table-wrap{border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--surface);box-shadow:var(--shadow);overflow-x:auto;-webkit-overflow-scrolling:touch}
+.data-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.74rem}
+.data-table th{padding:9px 14px;text-align:left;font-size:.58rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);background:var(--surface2);border-bottom:1.5px solid var(--border);white-space:nowrap;font-weight:600}
+.data-table td{padding:9px 14px;border-bottom:1px solid var(--border);color:var(--text2);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle}
 .data-table tr:last-child td{border-bottom:none}
 .data-table tr:hover td{background:var(--surface2);color:var(--text)}
 .td-null{opacity:.3;font-style:italic}
 .td-bool-true{color:var(--green);font-weight:600}
 .td-bool-false{color:var(--accent);font-weight:600}
-.td-num{color:#6366f1}
+.td-num{color:var(--indigo)}
 .td-actions{display:flex;gap:4px}
-.td-btn{padding:2px 7px;font-family:var(--sans);font-size:.65rem;font-weight:600;border-radius:5px;cursor:pointer;border:1.5px solid;transition:all .12s;background:transparent}
+.td-btn{padding:3px 8px;font-family:var(--sans);font-size:.63rem;font-weight:600;border-radius:5px;cursor:pointer;border:1.5px solid;transition:all .12s;background:transparent;white-space:nowrap}
 .td-btn-edit{border-color:var(--border);color:var(--text2)}
 .td-btn-edit:hover{border-color:var(--border2);color:var(--text);background:var(--surface2)}
-.td-btn-del{border-color:rgba(211,47,47,.2);color:var(--accent)}
-.td-btn-del:hover{background:var(--accent-dim);border-color:rgba(211,47,47,.4)}
+.td-btn-del{border-color:rgba(229,57,53,.2);color:var(--accent)}
+.td-btn-del:hover{background:var(--accent-dim);border-color:rgba(229,57,53,.4)}
 .empty-table{text-align:center;padding:40px;color:var(--muted);font-size:.8rem}
-.query-terminal{margin-top:14px;border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--surface);box-shadow:var(--shadow)}
+
+/* ── QUERY TERMINAL ── */
+.query-terminal{margin-top:12px;border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--surface);box-shadow:var(--shadow)}
 .qt-header{padding:8px 13px;background:var(--surface2);border-bottom:1px solid var(--border)}
-.qt-label{font-family:var(--mono);font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-weight:600}
-.qt-body{padding:9px;display:flex;gap:7px}
-.qt-input{flex:1;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:8px 11px;font-family:var(--mono);font-size:.78rem;color:var(--text);outline:none;transition:border-color .15s;min-width:0}
+.qt-label{font-family:var(--mono);font-size:.58rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-weight:600}
+.qt-body{padding:10px;display:flex;gap:7px}
+.qt-input{flex:1;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-family:var(--mono);font-size:.78rem;color:var(--text);outline:none;transition:border-color .15s;min-width:0}
 .qt-input:focus{border-color:var(--accent)}
-.qt-run{padding:8px 13px;background:var(--accent);border:1.5px solid var(--accent-b);border-radius:8px;color:#fff;font-family:var(--sans);font-size:.76rem;font-weight:700;cursor:pointer;transition:background .12s;white-space:nowrap}
+.qt-run{padding:9px 14px;background:var(--accent);border:1.5px solid var(--accent-b);border-radius:8px;color:#fff;font-family:var(--sans);font-size:.76rem;font-weight:700;cursor:pointer;transition:background .12s;white-space:nowrap}
 .qt-run:hover{background:var(--accent-b)}
-.qt-result{margin:0 9px 9px;padding:9px 11px;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;font-family:var(--mono);font-size:.74rem;color:var(--text2);display:none;white-space:pre-wrap;word-break:break-all;max-height:140px;overflow:auto}
-.qt-result.ok{color:var(--green);border-color:rgba(22,163,74,.3);background:var(--green-dim)}
-.qt-result.err{color:var(--accent);border-color:rgba(211,47,47,.3);background:var(--accent-dim)}
+.qt-result{margin:0 10px 10px;padding:10px 12px;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;font-family:var(--mono);font-size:.72rem;color:var(--text2);display:none;white-space:pre-wrap;word-break:break-all;max-height:160px;overflow:auto}
+.qt-result.ok{color:var(--green);border-color:rgba(34,197,94,.3);background:var(--green-dim)}
+.qt-result.err{color:var(--accent);border-color:rgba(229,57,53,.3);background:var(--accent-dim)}
 .qt-result.show{display:block}
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);backdrop-filter:blur(4px);z-index:100;align-items:center;justify-content:center;padding:16px}
+
+/* ── MODAL ── */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);z-index:100;align-items:flex-end;justify-content:center;padding:0}
 .modal-bg.open{display:flex}
-.modal{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:22px;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.15);animation:slideUp .2s ease}
-@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.modal-title{font-size:.88rem;font-weight:700;color:var(--text);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
-.modal-field{margin-bottom:11px}
-.modal-field label{display:block;font-size:.62rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-family:var(--mono);font-weight:600;margin-bottom:4px}
-.modal-field input{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:8px 11px;font-family:var(--mono);font-size:.82rem;color:var(--text);outline:none;transition:border-color .15s}
-.modal-field input:focus{border-color:var(--accent)}
-.modal-actions{display:flex;gap:7px;justify-content:flex-end;margin-top:16px;padding-top:12px;border-top:1px solid var(--border)}
-.toast{position:fixed;bottom:18px;right:18px;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:10px 15px;font-family:var(--sans);font-size:.78rem;font-weight:500;color:var(--text);z-index:200;transform:translateY(60px);opacity:0;transition:all .25s;pointer-events:none;box-shadow:var(--shadow)}
-.toast.show{transform:translateY(0);opacity:1}
-.toast.ok{border-color:rgba(22,163,74,.4);color:var(--green)}
-.toast.err{border-color:rgba(211,47,47,.4);color:var(--accent)}
+.modal{
+  background:var(--surface);border:1.5px solid var(--border);
+  border-radius:var(--radius-lg) var(--radius-lg) 0 0;
+  padding:20px 20px 32px;width:100%;max-width:560px;
+  box-shadow:0 -10px 40px rgba(0,0,0,.4);
+  animation:slideUp .22s ease;
+  max-height:90dvh;display:flex;flex-direction:column;
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.modal-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 16px;flex-shrink:0}
+.modal-title{font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);flex-shrink:0}
+.modal-scroll{flex:1;overflow-y:auto;padding-right:2px}
+.modal-field{margin-bottom:12px}
+.modal-field label{display:flex;align-items:center;gap:6px;font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-family:var(--mono);font-weight:600;margin-bottom:5px}
+.modal-field label .ftype{color:var(--accent);font-size:.58rem;background:var(--accent-dim);padding:1px 5px;border-radius:4px;border:1px solid rgba(229,57,53,.2)}
+/* textarea para STRING y JSON, input para el resto */
+.modal-field input,.modal-field textarea{
+  width:100%;background:var(--bg);border:1.5px solid var(--border);
+  border-radius:8px;padding:9px 12px;font-family:var(--mono);font-size:.82rem;
+  color:var(--text);outline:none;transition:border-color .15s;
+  -webkit-appearance:none;
+}
+.modal-field textarea{resize:vertical;min-height:80px;line-height:1.5}
+.modal-field input:focus,.modal-field textarea:focus{border-color:var(--accent)}
+.modal-actions{display:flex;gap:8px;margin-top:16px;padding-top:12px;border-top:1px solid var(--border);flex-shrink:0}
+.modal-actions .btn{flex:1;justify-content:center;padding:11px}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:10px 18px;font-family:var(--sans);font-size:.78rem;font-weight:500;color:var(--text);z-index:200;opacity:0;transition:all .25s;pointer-events:none;box-shadow:var(--shadow);white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.ok{border-color:rgba(34,197,94,.4);color:var(--green)}
+.toast.err{border-color:rgba(229,57,53,.4);color:var(--accent)}
+
+/* ── OVERLAY (mobile sidebar) ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:50}
+.overlay.open{display:block}
+
+/* ── MOBILE ── */
+@media(max-width:680px){
+  .sidebar{
+    position:fixed;left:0;top:0;bottom:0;z-index:60;
+    transform:translateX(-100%);width:260px;
+  }
+  .sidebar.open{transform:translateX(0)}
+  .close-sidebar{display:block}
+  .hamburger{display:flex;align-items:center}
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  .stat{padding:9px 12px}
+  .stat-val{font-size:1rem}
+  .content{padding:12px}
+  .tv-header{flex-direction:column;align-items:flex-start}
+  .tv-actions{width:100%;justify-content:flex-end}
+  .modal-bg{align-items:flex-end}
+  .modal{border-radius:var(--radius-lg) var(--radius-lg) 0 0;max-height:92dvh}
+  .topbar{padding:10px 12px}
+}
 </style>
 </head>
 <body>
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
 <div class="layout">
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
     <div class="sidebar-brand">
-      <div class="brand-name">EVO<span>DB</span></div>
-      <div class="brand-db">{{DBPATH}}</div>
+      <div>
+        <div class="brand-name">EVO<span>DB</span></div>
+        <div class="brand-db">{{DBPATH}}</div>
+      </div>
+      <button class="close-sidebar" onclick="closeSidebar()">✕</button>
     </div>
     <div class="sidebar-section">
       <div class="sidebar-label">Tablas</div>
@@ -629,20 +720,24 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--sa
       <a href="/logout" class="logout-btn">✕ Cerrar sesión</a>
     </div>
   </aside>
+
   <main class="main">
     <div class="topbar">
-      <div class="topbar-title">Dashboard <span>/ EvoDB</span></div>
+      <div class="topbar-left">
+        <button class="hamburger" onclick="openSidebar()">☰</button>
+        <div class="topbar-title">Dashboard <span>/ EvoDB</span></div>
+      </div>
       <div class="status-pill">Online</div>
     </div>
     <div class="stats-row">
       <div class="stat"><div class="stat-label">Tablas</div><div class="stat-val accent">{{TABLECOUNT}}</div></div>
       <div class="stat"><div class="stat-label">Registros</div><div class="stat-val">{{ROWCOUNT}}</div></div>
-      <div class="stat"><div class="stat-label">Uptime</div><div class="stat-val" style="font-size:1rem">{{UPTIME}}</div></div>
+      <div class="stat"><div class="stat-label">Uptime</div><div class="stat-val" style="font-size:.85rem;margin-top:4px">{{UPTIME}}</div></div>
       <div class="stat"><div class="stat-label">Queries</div><div class="stat-val">{{QUERIES}}</div></div>
     </div>
     <div class="content">
       <div class="welcome" id="welcomeScreen">
-        <div style="font-size:2rem">⬡</div>
+        <div class="welcome-icon">⬡</div>
         <h2>Selecciona una tabla para explorar</h2>
       </div>
       <div class="table-view" id="tableView">
@@ -665,7 +760,7 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--sa
         <div class="query-terminal">
           <div class="qt-header"><span class="qt-label">◈ Terminal</span></div>
           <div class="qt-body">
-            <input class="qt-input" id="qtInput" placeholder="PULL users LIMIT 10" onkeydown="if(event.key==='Enter')runQuery()">
+            <input class="qt-input" id="qtInput" placeholder="PULL tabla LIMIT 10" onkeydown="if(event.key==='Enter')runQuery()">
             <button class="qt-run" onclick="runQuery()">Run</button>
           </div>
           <div class="qt-result" id="qtResult"></div>
@@ -677,8 +772,9 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--sa
 
 <div class="modal-bg" id="modal" onclick="if(event.target===this)closeModal()">
   <div class="modal">
+    <div class="modal-handle"></div>
     <div class="modal-title" id="modalTitle">Insertar fila</div>
-    <div id="modalFields"></div>
+    <div class="modal-scroll" id="modalFields"></div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
       <button class="btn btn-primary" onclick="submitModal()" id="modalSubmit">Insertar</button>
@@ -690,25 +786,32 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--sa
 <script>
 let currentTable = null, currentSchema = [], currentRows = [], editRowIndex = null;
 
+function openSidebar(){
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('overlay').classList.add('open');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+}
+
 function showToast(msg, type='ok') {
   const t = document.getElementById('toast');
   t.textContent = msg; t.className = 'toast show ' + type;
-  setTimeout(() => t.className = 'toast', 2500);
+  setTimeout(() => t.className = 'toast', 2800);
 }
 
 function formatCellValue(val, type) {
   if (val === null || val === undefined) return '<span class="td-null">null</span>';
   if (type === 'BOOL') {
-    return val === true || val === 'true'
+    return (val === true || val === 'true')
       ? '<span class="td-bool-true">true</span>'
       : '<span class="td-bool-false">false</span>';
   }
-  if (type === 'INT' || type === 'FLOAT') {
-    return '<span class="td-num">' + val + '</span>';
-  }
+  if (type === 'INT' || type === 'FLOAT') return '<span class="td-num">' + val + '</span>';
   const str = String(val);
   const escaped = str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  return '<span title="' + escaped + '">' + (escaped.length > 40 ? escaped.slice(0,40)+'…' : escaped) + '</span>';
+  return '<span title="' + escaped + '">' + (escaped.length > 36 ? escaped.slice(0,36)+'…' : escaped) + '</span>';
 }
 
 async function loadTable(name) {
@@ -716,6 +819,7 @@ async function loadTable(name) {
   const item = document.getElementById('titem-' + name);
   if (item) item.classList.add('active');
   currentTable = name;
+  closeSidebar();
   document.getElementById('welcomeScreen').style.display = 'none';
   document.getElementById('tableView').style.display = 'block';
   document.getElementById('tvName').textContent = name;
@@ -733,10 +837,14 @@ function renderTable() {
   const head = document.getElementById('tvHead');
   const body = document.getElementById('tvBody');
   document.getElementById('tvCount').textContent = currentRows.length + ' rows';
-  if (!currentSchema.length) { head.innerHTML = ''; body.innerHTML = '<tr><td colspan="99"><div class="empty-table">Sin esquema</div></td></tr>'; return; }
+  if (!currentSchema.length) {
+    head.innerHTML = ''; 
+    body.innerHTML = '<tr><td colspan="99"><div class="empty-table">Sin esquema</div></td></tr>';
+    return;
+  }
   head.innerHTML = '<tr>' + currentSchema.map(c =>
-    '<th>' + c.name + ' <small style="opacity:.45">' + c.type + (c.indexed?' ⬡':'') + '</small></th>'
-  ).join('') + '<th style="width:90px">Acciones</th></tr>';
+    '<th>' + c.name + ' <small style="opacity:.4">' + c.type + (c.indexed?' ⬡':'') + '</small></th>'
+  ).join('') + '<th style="width:100px">Acciones</th></tr>';
   if (!currentRows.length) {
     body.innerHTML = '<tr><td colspan="' + (currentSchema.length+1) + '"><div class="empty-table">Sin registros</div></td></tr>';
     return;
@@ -754,16 +862,52 @@ function renderTable() {
 
 async function refreshTable() { if (currentTable) await loadTable(currentTable); }
 
+/* --- Determina si un campo debe usar textarea --- */
+function isMultiline(col) {
+  return col.type === 'STRING' || col.type === 'JSON';
+}
+
+function buildField(c, val) {
+  const label = '<label>' + c.name + ' <span class="ftype">' + c.type + (c.indexed?' ⬡':'') + '</span></label>';
+  const safeVal = (val !== null && val !== undefined) ? String(val) : '';
+  if (isMultiline(c)) {
+    const escaped = safeVal.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    return '<div class="modal-field">' + label +
+      '<textarea id="mf_' + c.name + '" placeholder="' + c.name + '" rows="3">' + escaped + '</textarea></div>';
+  }
+  const escaped = safeVal.replace(/"/g,'&quot;');
+  return '<div class="modal-field">' + label +
+    '<input id="mf_' + c.name + '" value="' + escaped + '" placeholder="' + c.name + '"></div>';
+}
+
+function getFieldValue(c) {
+  const el = document.getElementById('mf_' + c.name);
+  return el ? el.value : '';
+}
+
+/* --- Serializa valor según tipo para el protocolo evodb --- */
+function serializeVal(c, rawVal) {
+  const v = rawVal.trim();
+  if (v === '' || v.toLowerCase() === 'null') return 'NULL';
+  if (c.type === 'INT') return isNaN(Number(v)) ? JSON.stringify(v) : v;
+  if (c.type === 'FLOAT') return isNaN(parseFloat(v)) ? JSON.stringify(v) : v;
+  if (c.type === 'BOOL') {
+    const lower = v.toLowerCase();
+    if (lower === 'true' || lower === 'false') return lower;
+    return JSON.stringify(v);
+  }
+  /* STRING / JSON: enviar como string entre comillas dobles */
+  return '"' + v.replace(/\\/g,'\\\\').replace(/"/g,'\\"') + '"';
+}
+
 function openInsertModal() {
   editRowIndex = null;
   document.getElementById('modalTitle').textContent = 'Insertar — ' + currentTable;
   document.getElementById('modalSubmit').textContent = 'Insertar';
-  document.getElementById('modalFields').innerHTML = currentSchema.map(c =>
-    '<div class="modal-field"><label>' + c.name + ' <span style="color:var(--accent);margin-left:4px">' + c.type + '</span></label>' +
-    '<input id="mf_' + c.name + '" placeholder="' + c.name + '"></div>'
-  ).join('');
+  document.getElementById('modalFields').innerHTML = currentSchema.map(c => buildField(c, '')).join('');
   document.getElementById('modal').classList.add('open');
-  if (currentSchema[0]) document.getElementById('mf_' + currentSchema[0].name)?.focus();
+  const first = currentSchema[0];
+  if (first) { const el = document.getElementById('mf_' + first.name); if(el) el.focus(); }
 }
 
 function openEditModal(i) {
@@ -771,17 +915,14 @@ function openEditModal(i) {
   const row = currentRows[i];
   document.getElementById('modalTitle').textContent = 'Editar — ' + currentTable;
   document.getElementById('modalSubmit').textContent = 'Guardar';
-  document.getElementById('modalFields').innerHTML = currentSchema.map(c =>
-    '<div class="modal-field"><label>' + c.name + ' <span style="color:var(--accent);margin-left:4px">' + c.type + '</span></label>' +
-    '<input id="mf_' + c.name + '" value="' + (row[c.name] !== null && row[c.name] !== undefined ? String(row[c.name]).replace(/"/g,'&quot;') : '') + '"></div>'
-  ).join('');
+  document.getElementById('modalFields').innerHTML = currentSchema.map(c => buildField(c, row[c.name])).join('');
   document.getElementById('modal').classList.add('open');
 }
 
 function closeModal() { document.getElementById('modal').classList.remove('open'); }
 
 async function submitModal() {
-  const vals = currentSchema.map(c => JSON.stringify(document.getElementById('mf_' + c.name)?.value || ''));
+  const vals = currentSchema.map(c => serializeVal(c, getFieldValue(c)));
   let cmd;
   if (editRowIndex !== null) {
     const keyCol = currentSchema.find(c => c.indexed) || currentSchema[0];
@@ -796,7 +937,7 @@ async function submitModal() {
     });
     const data = await res.json();
     if (data.result?.startsWith('ERR')) { showToast(data.result, 'err'); }
-    else { showToast(editRowIndex !== null ? 'Fila actualizada' : 'Fila insertada'); closeModal(); await refreshTable(); }
+    else { showToast(editRowIndex !== null ? '✓ Fila actualizada' : '✓ Fila insertada'); closeModal(); await refreshTable(); }
   } catch(e) { showToast('Error de red', 'err'); }
 }
 
@@ -806,14 +947,15 @@ async function deleteRow(i) {
   if (!keyCol) { showToast('Sin columna clave', 'err'); return; }
   const keyVal = row[keyCol.name];
   if (!confirm('¿Eliminar fila donde ' + keyCol.name + ' = ' + keyVal + '?')) return;
-  const cmd = 'BURN ' + currentTable + ' WHERE ' + keyCol.name + ' = ' + JSON.stringify(String(keyVal));
+  const keyValSerialized = serializeVal(keyCol, String(keyVal));
+  const cmd = 'BURN ' + currentTable + ' WHERE ' + keyCol.name + ' = ' + keyValSerialized;
   try {
     const res = await fetch('/api/table/' + currentTable, {
       method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({cmd})
     });
     const data = await res.json();
     if (data.result?.startsWith('ERR')) { showToast(data.result, 'err'); }
-    else { showToast('Fila eliminada'); await refreshTable(); }
+    else { showToast('✓ Fila eliminada'); await refreshTable(); }
   } catch(e) { showToast('Error de red', 'err'); }
 }
 
