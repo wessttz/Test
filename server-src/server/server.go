@@ -860,7 +860,17 @@ function renderTable() {
   ).join('');
 }
 
-async function refreshTable() { if (currentTable) await loadTable(currentTable); }
+async function refreshTable() {
+  if (!currentTable) return;
+  try {
+    const res = await fetch('/api/table/' + currentTable);
+    const data = await res.json();
+    currentSchema = data.schema || [];
+    currentRows = data.rows || [];
+    renderTable();
+    showToast('↺ Tabla actualizada');
+  } catch(e) { showToast('Error al refrescar', 'err'); }
+}
 
 /* --- Determina si un campo debe usar textarea --- */
 function isMultiline(col) {
@@ -871,14 +881,25 @@ function buildField(c, val) {
   const label = '<label>' + c.name + ' <span class=\"ftype\">' + c.type + (c.indexed?' ⯁':'') + '</span></label>';
   let display = '';
   if (val !== null && val !== undefined) {
-    display = (typeof val === 'object') ? JSON.stringify(val, null, 2) : String(val);
+    if (typeof val === 'object') {
+      display = JSON.stringify(val, null, 2);
+    } else {
+      const s = String(val);
+      // Unescape \" to " (server stores JSON as escaped string)
+      const unescaped = s.replace(/\\"/g, '"');
+      if ((unescaped.startsWith('{') || unescaped.startsWith('[')) && (unescaped.endsWith('}') || unescaped.endsWith(']'))) {
+        try { display = JSON.stringify(JSON.parse(unescaped), null, 2); } catch(e) { display = unescaped; }
+      } else {
+        display = unescaped;
+      }
+    }
   }
   if (isMultiline(c)) {
     const tmp = document.createElement('div');
     tmp.textContent = display;
     const safe = tmp.innerHTML;
     return '<div class=\"modal-field\">' + label +
-      '<textarea id=\"mf_' + c.name + '\" placeholder=\"' + c.name + '\" rows=\"4\">' + safe + '</textarea></div>';
+      '<textarea id=\"mf_' + c.name + '\" placeholder=\"' + c.name + '\" rows=\"6\" style=\"font-size:.72rem;line-height:1.6\">' + safe + '</textarea></div>';
   }
   const escaped = display.replace(/\"/g,'&quot;');
   return '<div class=\"modal-field\">' + label +
