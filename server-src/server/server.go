@@ -868,16 +868,21 @@ function isMultiline(col) {
 }
 
 function buildField(c, val) {
-  const label = '<label>' + c.name + ' <span class="ftype">' + c.type + (c.indexed?' ⬡':'') + '</span></label>';
-  const safeVal = (val !== null && val !== undefined) ? String(val) : '';
-  if (isMultiline(c)) {
-    const escaped = safeVal.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    return '<div class="modal-field">' + label +
-      '<textarea id="mf_' + c.name + '" placeholder="' + c.name + '" rows="3">' + escaped + '</textarea></div>';
+  const label = '<label>' + c.name + ' <span class=\"ftype\">' + c.type + (c.indexed?' ⯁':'') + '</span></label>';
+  let display = '';
+  if (val !== null && val !== undefined) {
+    display = (typeof val === 'object') ? JSON.stringify(val, null, 2) : String(val);
   }
-  const escaped = safeVal.replace(/"/g,'&quot;');
-  return '<div class="modal-field">' + label +
-    '<input id="mf_' + c.name + '" value="' + escaped + '" placeholder="' + c.name + '"></div>';
+  if (isMultiline(c)) {
+    const tmp = document.createElement('div');
+    tmp.textContent = display;
+    const safe = tmp.innerHTML;
+    return '<div class=\"modal-field\">' + label +
+      '<textarea id=\"mf_' + c.name + '\" placeholder=\"' + c.name + '\" rows=\"4\">' + safe + '</textarea></div>';
+  }
+  const escaped = display.replace(/\"/g,'&quot;');
+  return '<div class=\"modal-field\">' + label +
+    '<input id=\"mf_' + c.name + '\" value=\"' + escaped + '\" placeholder=\"' + c.name + '\"></div>';
 }
 
 function getFieldValue(c) {
