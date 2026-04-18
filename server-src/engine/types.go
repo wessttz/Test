@@ -7,7 +7,7 @@ import (
 
 var MagicBytes = [5]byte{'E', 'V', 'O', 'D', 'B'}
 
-const Version = 3
+const Version = 4
 
 type DataType uint8
 
@@ -16,8 +16,7 @@ const (
 	TypeFloat  DataType = 2
 	TypeString DataType = 3
 	TypeBool   DataType = 4
-	TypeJSON   DataType = 5
-	TypeNull   DataType = 6
+	TypeNull   DataType = 5
 )
 
 func (d DataType) String() string {
@@ -30,8 +29,6 @@ func (d DataType) String() string {
 		return "STRING"
 	case TypeBool:
 		return "BOOL"
-	case TypeJSON:
-		return "JSON"
 	case TypeNull:
 		return "NULL"
 	default:
@@ -49,10 +46,11 @@ func ParseDataType(s string) (DataType, error) {
 		return TypeString, nil
 	case "BOOL":
 		return TypeBool, nil
-	case "JSON":
-		return TypeJSON, nil
 	case "NULL":
 		return TypeNull, nil
+	// Keep JSON as alias for STRING for backwards compat
+	case "JSON":
+		return TypeString, nil
 	default:
 		return 0, fmt.Errorf("unknown type: %s", s)
 	}
@@ -96,12 +94,10 @@ func (v Value) String() string {
 			return "true"
 		}
 		return "false"
-	case TypeJSON:
-		return v.StrVal
 	case TypeNull:
 		return "null"
 	default:
-		return "nil"
+		return ""
 	}
 }
 
@@ -117,7 +113,7 @@ func (v Value) Equals(other Value) bool {
 		return v.IntVal == other.IntVal
 	case TypeFloat:
 		return v.FltVal == other.FltVal
-	case TypeString, TypeJSON:
+	case TypeString:
 		return v.StrVal == other.StrVal
 	case TypeBool:
 		return v.BoolVal == other.BoolVal

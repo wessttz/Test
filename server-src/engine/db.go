@@ -24,7 +24,6 @@ func Open(path string) (*DB, error) {
 		path:   path,
 		tables: make(map[string]*Table),
 	}
-
 	wal, err := openWAL(path + ".wal")
 	if err != nil {
 		return nil, fmt.Errorf("failed to open WAL: %w", err)
@@ -40,11 +39,9 @@ func Open(path string) (*DB, error) {
 			return nil, fmt.Errorf("failed to load database: %w", err)
 		}
 	}
-
 	if err := db.wal.replay(db); err != nil {
 		return nil, fmt.Errorf("WAL replay failed: %w", err)
 	}
-
 	return db, nil
 }
 
@@ -69,11 +66,9 @@ func (db *DB) Checkpoint() error {
 func (db *DB) ForgeTable(name string, columns []Column) error {
 	db.mu.Lock()
 	defer db.mu.Unlock()
-
 	if _, exists := db.tables[name]; exists {
 		return fmt.Errorf("table %q already exists", name)
 	}
-
 	t := &Table{
 		Name:    name,
 		Columns: columns,
@@ -86,7 +81,6 @@ func (db *DB) ForgeTable(name string, columns []Column) error {
 		}
 	}
 	db.tables[name] = t
-
 	if err := db.wal.writeForge(name, columns); err != nil {
 		return err
 	}
@@ -96,7 +90,6 @@ func (db *DB) ForgeTable(name string, columns []Column) error {
 func (db *DB) DropTable(name string) error {
 	db.mu.Lock()
 	defer db.mu.Unlock()
-
 	if _, exists := db.tables[name]; !exists {
 		return fmt.Errorf("table %q not found", name)
 	}
@@ -131,7 +124,6 @@ func (db *DB) GetSchema(tableName string) ([]Column, error) {
 func (db *DB) AddIndex(tableName, colName string) error {
 	db.mu.Lock()
 	defer db.mu.Unlock()
-
 	table, err := db.getTable(tableName)
 	if err != nil {
 		return err
@@ -171,7 +163,6 @@ func (db *DB) rebuildIndex(table *Table, colName string) {
 func (db *DB) PushRow(tableName string, values []Value) error {
 	db.mu.Lock()
 	defer db.mu.Unlock()
-
 	table, err := db.getTable(tableName)
 	if err != nil {
 		return err
@@ -179,7 +170,6 @@ func (db *DB) PushRow(tableName string, values []Value) error {
 	if err := db.validateRow(table, values); err != nil {
 		return err
 	}
-
 	newIdx := len(table.Rows)
 	table.Rows = append(table.Rows, Row(values))
 	for colName, idx := range table.indexes {
@@ -187,7 +177,6 @@ func (db *DB) PushRow(tableName string, values []Value) error {
 		key := values[colIdx].String()
 		idx[key] = append(idx[key], newIdx)
 	}
-
 	if err := db.wal.writeUpsert(tableName, "", values); err != nil {
 		return err
 	}
@@ -197,7 +186,6 @@ func (db *DB) PushRow(tableName string, values []Value) error {
 func (db *DB) UpsertRow(tableName string, keyCol string, values []Value) error {
 	db.mu.Lock()
 	defer db.mu.Unlock()
-
 	table, err := db.getTable(tableName)
 	if err != nil {
 		return err
@@ -205,13 +193,11 @@ func (db *DB) UpsertRow(tableName string, keyCol string, values []Value) error {
 	if err := db.validateRow(table, values); err != nil {
 		return err
 	}
-
 	keyIdx, err := db.colIndex(table, keyCol)
 	if err != nil {
 		return err
 	}
 	keyVal := values[keyIdx]
-
 	existingIdx := -1
 	if idx, hasIndex := table.indexes[keyCol]; hasIndex {
 		if rows, ok := idx[keyVal.String()]; ok && len(rows) > 0 {
@@ -225,7 +211,6 @@ func (db *DB) UpsertRow(tableName string, keyCol string, values []Value) error {
 			}
 		}
 	}
-
 	if existingIdx >= 0 {
 		table.Rows[existingIdx] = Row(values)
 		for colName := range table.indexes {
@@ -240,7 +225,6 @@ func (db *DB) UpsertRow(tableName string, keyCol string, values []Value) error {
 			idx[key] = append(idx[key], newIdx)
 		}
 	}
-
 	if err := db.wal.writeUpsert(tableName, keyCol, values); err != nil {
 		return err
 	}
@@ -250,12 +234,10 @@ func (db *DB) UpsertRow(tableName string, keyCol string, values []Value) error {
 func (db *DB) Query(tableName string, conditions []Condition, orderBy *OrderBy, limit int) ([]Row, []Column, error) {
 	db.mu.RLock()
 	defer db.mu.RUnlock()
-
 	table, err := db.getTable(tableName)
 	if err != nil {
 		return nil, nil, err
 	}
-
 	var result []Row
 	for _, row := range table.Rows {
 		match := true
@@ -269,7 +251,6 @@ func (db *DB) Query(tableName string, conditions []Condition, orderBy *OrderBy, 
 			result = append(result, row)
 		}
 	}
-
 	if orderBy != nil {
 		colIdx := -1
 		for i, c := range table.Columns {
@@ -288,11 +269,9 @@ func (db *DB) Query(tableName string, conditions []Condition, orderBy *OrderBy, 
 			})
 		}
 	}
-
 	if limit > 0 && limit < len(result) {
 		result = result[:limit]
 	}
-
 	return result, table.Columns, nil
 }
 
@@ -307,25 +286,20 @@ func (db *DB) PullRows(tableName string, colName string, filterVal *Value, limit
 func (db *DB) CountRows(tableName string, colName string, filterVal *Value) (int, error) {
 	db.mu.RLock()
 	defer db.mu.RUnlock()
-
 	table, err := db.getTable(tableName)
 	if err != nil {
 		return 0, err
 	}
-
 	if filterVal == nil {
 		return len(table.Rows), nil
 	}
-
 	colIdx, err := db.colIndex(table, colName)
 	if err != nil {
 		return 0, err
 	}
-
 	if idx, hasIndex := table.indexes[colName]; hasIndex {
 		return len(idx[filterVal.String()]), nil
 	}
-
 	count := 0
 	for _, row := range table.Rows {
 		if row[colIdx].Equals(*filterVal) {
@@ -338,7 +312,6 @@ func (db *DB) CountRows(tableName string, colName string, filterVal *Value) (int
 func (db *DB) BurnRows(tableName string, colName string, filterVal Value) (int, error) {
 	db.mu.Lock()
 	defer db.mu.Unlock()
-
 	table, err := db.getTable(tableName)
 	if err != nil {
 		return 0, err
@@ -347,7 +320,6 @@ func (db *DB) BurnRows(tableName string, colName string, filterVal Value) (int, 
 	if err != nil {
 		return 0, err
 	}
-
 	var remaining []Row
 	deleted := 0
 	for _, row := range table.Rows {
@@ -361,7 +333,6 @@ func (db *DB) BurnRows(tableName string, colName string, filterVal Value) (int, 
 	for colName := range table.indexes {
 		db.rebuildIndex(table, colName)
 	}
-
 	if err := db.wal.writeBurn(tableName, colName, filterVal); err != nil {
 		return deleted, err
 	}
@@ -371,7 +342,6 @@ func (db *DB) BurnRows(tableName string, colName string, filterVal Value) (int, 
 func (db *DB) ReforgeRows(tableName string, whereCol string, whereVal Value, setCol string, setVal Value) (int, error) {
 	db.mu.Lock()
 	defer db.mu.Unlock()
-
 	table, err := db.getTable(tableName)
 	if err != nil {
 		return 0, err
@@ -384,10 +354,9 @@ func (db *DB) ReforgeRows(tableName string, whereCol string, whereVal Value, set
 	if err != nil {
 		return 0, err
 	}
-	if setVal.Type != table.Columns[setIdx].Type {
+	if setVal.Type != TypeNull && setVal.Type != table.Columns[setIdx].Type {
 		return 0, fmt.Errorf("column %q expects %s", setCol, table.Columns[setIdx].Type)
 	}
-
 	updated := 0
 	for i, row := range table.Rows {
 		if row[whereIdx].Equals(whereVal) {
@@ -400,7 +369,6 @@ func (db *DB) ReforgeRows(tableName string, whereCol string, whereVal Value, set
 			db.rebuildIndex(table, colName)
 		}
 	}
-
 	if err := db.wal.writeReforge(tableName, whereCol, whereVal, setCol, setVal); err != nil {
 		return updated, err
 	}
@@ -452,20 +420,16 @@ func (db *DB) checkpointIfNeeded() error {
 
 func (db *DB) flush() error {
 	var buf bytes.Buffer
-
 	buf.Write(MagicBytes[:])
 	buf.WriteByte(Version)
 	writeUint32(&buf, uint32(len(db.tables)))
-
 	for _, table := range db.tables {
 		if err := writeTable(&buf, table); err != nil {
 			return err
 		}
 	}
-
 	checksum := crc32.ChecksumIEEE(buf.Bytes())
 	writeUint32(&buf, checksum)
-
 	tmp := db.path + ".tmp"
 	if err := os.WriteFile(tmp, buf.Bytes(), 0644); err != nil {
 		return err
@@ -481,16 +445,13 @@ func (db *DB) load() error {
 	if len(data) < 10 {
 		return fmt.Errorf("file too small")
 	}
-
 	body := data[:len(data)-4]
 	storedCRC := binary.BigEndian.Uint32(data[len(data)-4:])
 	actualCRC := crc32.ChecksumIEEE(body)
 	if storedCRC != actualCRC {
 		return fmt.Errorf("checksum mismatch: file may be corrupted")
 	}
-
 	r := bytes.NewReader(body)
-
 	magic := make([]byte, 5)
 	if _, err := io.ReadFull(r, magic); err != nil {
 		return fmt.Errorf("invalid file: %w", err)
@@ -498,20 +459,18 @@ func (db *DB) load() error {
 	if !bytes.Equal(magic, MagicBytes[:]) {
 		return fmt.Errorf("not a valid .evodb file")
 	}
-
 	ver, err := r.ReadByte()
 	if err != nil {
 		return err
 	}
-	if ver != Version && ver != 2 {
+	// Support versions 2, 3, and 4
+	if ver != Version && ver != 3 && ver != 2 {
 		return fmt.Errorf("unsupported version: %d", ver)
 	}
-
 	numTables, err := readUint32(r)
 	if err != nil {
 		return err
 	}
-
 	for i := 0; i < int(numTables); i++ {
 		table, err := readTable(r)
 		if err != nil {
@@ -525,7 +484,6 @@ func (db *DB) load() error {
 		}
 		db.tables[table.Name] = table
 	}
-
 	return nil
 }
 
@@ -575,7 +533,7 @@ func writeValue(w *bytes.Buffer, v Value) error {
 		b := make([]byte, 8)
 		binary.BigEndian.PutUint64(b, math.Float64bits(v.FltVal))
 		w.Write(b)
-	case TypeString, TypeJSON:
+	case TypeString:
 		writeString(w, v.StrVal)
 	case TypeBool:
 		if v.BoolVal {
@@ -633,7 +591,12 @@ func readTable(r *bytes.Reader) (*Table, error) {
 		if err != nil {
 			return nil, err
 		}
-		cols[i] = Column{Name: colName, Type: DataType(typeByte), Indexed: indexedByte == 1}
+		dt := DataType(typeByte)
+		// Backwards compat: TypeJSON (5) → TypeString (3)
+		if dt == 5 {
+			dt = TypeString
+		}
+		cols[i] = Column{Name: colName, Type: dt, Indexed: indexedByte == 1}
 	}
 	numRows, err := readUint32(r)
 	if err != nil {
@@ -659,8 +622,13 @@ func readValue(r *bytes.Reader) (Value, error) {
 	if err != nil {
 		return Value{}, err
 	}
-	v := Value{Type: DataType(typeByte)}
-	switch v.Type {
+	dt := DataType(typeByte)
+	// Backwards compat: TypeJSON (5) → TypeString (3)
+	if dt == 5 {
+		dt = TypeString
+	}
+	v := Value{Type: dt}
+	switch dt {
 	case TypeInt:
 		b := make([]byte, 8)
 		if _, err := io.ReadFull(r, b); err != nil {
@@ -673,7 +641,7 @@ func readValue(r *bytes.Reader) (Value, error) {
 			return Value{}, err
 		}
 		v.FltVal = math.Float64frombits(binary.BigEndian.Uint64(b))
-	case TypeString, TypeJSON:
+	case TypeString:
 		s, err := readString(r)
 		if err != nil {
 			return Value{}, err
