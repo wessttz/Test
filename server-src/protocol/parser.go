@@ -385,7 +385,7 @@ func parseValue(s string) (engine.Value, error) {
 	}
 	if (strings.HasPrefix(s, "{") && strings.HasSuffix(s, "}")) ||
 		(strings.HasPrefix(s, "[") && strings.HasSuffix(s, "]")) {
-		return engine.Value{Type: engine.TypeJSON, StrVal: s}, nil
+		return engine.Value{Type: engine.TypeString, StrVal: s}, nil
 	}
 	if strings.ToLower(s) == "true" {
 		return engine.Value{Type: engine.TypeBool, BoolVal: true}, nil
