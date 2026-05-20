@@ -1,7 +1,7 @@
 {
   "name": "evodb",
   "version": "1.0.0",
-  "description": "Node.js client for EvoDB — a fast custom database with its own binary protocol",
+  "description": "Node.js db",
   "main": "src/client.js",
   "types": "src/client.d.ts",
   "scripts": {
