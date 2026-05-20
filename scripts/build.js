@@ -1,15 +1,6 @@
 #!/usr/bin/env node
 'use strict';
 
-/**
- * Compiles the evodb server binary.
- * Run: node scripts/build.js [linux|darwin|windows]
- *
- * Output:
- *   bin/evodb          (linux/mac)
- *   bin/evodb.exe      (windows)
- */
-
 const { execSync, spawnSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
